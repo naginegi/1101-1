@@ -26,6 +26,9 @@ export default {
             // this.quizVoList.qu.ispublished = true
             this.quizVoList.qn.published = true;
             this.LocalDate();
+            console.log("存入結果")
+            console.log(this.quizVoList.qn)
+            console.log(this.quizVoList.quList)
             this.create()
         },
         set_not_publisged() {
@@ -41,9 +44,9 @@ export default {
             console.log(this.opList);
         },
         create() {
-            this.quizVoList.quList.forEach(item => {
-            });
+            
             axios.post("http://localhost:8082/api/quiz/create", {
+                
                 questionnaire:this.quizVoList.qn,                
                 questionList: this.quizVoList.quList
             })

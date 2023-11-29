@@ -19,6 +19,7 @@ export default {
             },
             quList: [],
             qu: {
+                // id:0,
                 qnid: 1,
                 quid: 0,
                 title: "",
@@ -82,7 +83,9 @@ export default {
             }
             // 使qu獨立
             const clonedQu = JSON.parse(JSON.stringify(this.qu));
+            console.log(this.edit_state)
             if (this.edit_status == true) {
+                // this.qu.id = this.quList.
                 this.quList[this.qu.quid] = this.qu;
             }
             else {
@@ -123,27 +126,28 @@ export default {
         },
         sort_id() {
             let len = this.quList.length;
-            for (let i = 0; i < len; i++) {
-                console.log(this.quList[i].quid);
-            }
-            console.log("======================");
+            // for (let i = 0; i < len; i++) {
+            // console.log(this.quList[i].quid);
+            // }
+            // console.log("======================");
             for (let i = 0; i < len; i++) {
                 this.quList[i].quid = i + 1;
-                console.log(this.quList[i].quid);
+                // console.log(this.quList[i].quid);
             }
         },
-        edit_question(id, type) {
+        edit_question(i, type) {
             this.switch_addPage();
             this.edit_status = true;
             this.qu = {
-                quid: id,
-                title: this.quList[id].title,
-                options_type: this.quList[id].options_type,
+                id:this.quList[i].id,
+                quid: i,
+                title: this.quList[i].title,
+                options_type: this.quList[i].options_type,
             };
             if (type == "radio") {
-                this.options.radio_arr = this.quList[id].options.split(";");
+                this.options.radio_arr = this.quList[i].options.split(";");
             }else if(type == "checkbox"){
-                this.options.checkbox_arr = this.quList[id].options.split(";");
+                this.options.checkbox_arr = this.quList[i].options.split(";");
             }
             console.log(this.options);
             // this.options = {

@@ -1,6 +1,7 @@
 <script>
 import axios from 'axios';
 import { RouterLink, RouterView } from "vue-router";
+import UserB from './userB.vue';
 export default {
     data() {
         return {
@@ -9,23 +10,24 @@ export default {
             total_arr: [],
             pageCode_arr: [],
             page: 0,
-            title:"",
-            startDate:"",
-            start:"",
-            endDate:"",
-            end:"",
+            title: "",
+            startDate: "",
+            start: "",
+            endDate: "",
+            end: "",
             pre_Title_Text: "",
             pre_Instruction: "",
+            write_List: {},
+            write_page:false,
         };
     },
     mounted() {
         this.getDate();
-        console.log(this.total_arr)
+        console.log(this.total_arr);
         this.page = this.total_arr.length / 10 + 1;
-        for (let i = 1; i <= this.page+2; i++) {
+        for (let i = 1; i <= this.page + 2; i++) {
             this.pageCode_arr.push(i);
         }
-
     },
     methods: {
         getDate() {
@@ -34,70 +36,81 @@ export default {
                     this.data = response.data;
                     this.total_arr = this.data.quizVoList;
                     this.addDisplayArr(1);
-                    console.log(this.data.quizVoList)
-                    console.log(this.total_arr)
+                    console.log(this.data.quizVoList);
+                    console.log(this.total_arr);
                 })
                 .catch(error => {
                     console.error("error", error);
-                })
+                });
         },
         addDisplayArr(k) {
             this.display_arr = [];
             for (let j = 0 + ((k - 1) * 10); j < 10 * k; j++) {
                 if (this.total_arr[j] != null) {
                     this.display_arr.push(this.total_arr[j]);
-                } else {
+                }
+                else {
                     return;
                 }
             }
-
-            console.log(this.pageCode_arr)
+            console.log(this.pageCode_arr);
         },
         getindex(index) {
             // console.log(index)
             this.pre_Title_Text = this.display_arr[index].questionnaire.title;
             this.pre_Instruction = this.display_arr[index].questionnaire.description;
+
         },
         switch_page(i) {
-            console.log("switch:" + i)
+            console.log("switch:" + i);
             this.addDisplayArr(i);
         },
-        search(){
-            if(this.startDate == ""){
-                this.start = "1970-01-01"
-            }else{
-                this.start = this.startDate
+        search() {
+            if (this.startDate == "") {
+                this.start = "1970-01-01";
             }
-            if(this.endDate == ""){
-                this.end = "2099-12-31"
-            }else{
-                this.end = this.endDate
+            else {
+                this.start = this.startDate;
+            }
+            if (this.endDate == "") {
+                this.end = "2099-12-31";
+            }
+            else {
+                this.end = this.endDate;
             }
             axios.get(`http://localhost:8082/api/quiz/search2?title=${this.title}&startDate=${this.start}&endDate=${this.end}`)
                 .then(response => {
                     this.total_arr = response.data.quizVoList;
                     this.addDisplayArr(1);
-                    console.log("total")
-                    console.log(this.total_arr)
-
+                    console.log("total");
+                    console.log(this.total_arr);
                 })
                 .catch(error => {
                     console.error("error", error);
-                })
-                console.log(this.title)
-                console.log(this.startDate)
-                console.log(this.endDate)
+                });
+            console.log(this.title);
+            console.log(this.startDate);
+            console.log(this.endDate);
+        },
+        write_qu(index) {
+            this.write_List = this.display_arr[index];
+            this.switch_write_page();
+            console.log(this.write_List);
+        },
+        switch_write_page(){
+            this.write_page = !this.write_page
         }
-    }
+    },
+    components: { UserB }
 };
 </script>
 
 <template>
-    <div class="Aarea">
+    <div class="Aarea" v-if="write_page == false">
         <div class="search">
             <label>名稱搜尋：</label>
             <!-- <p></p> -->
-            <input class="search_input" type="text" placeholder="search..." v-model="title"/>
+            <input class="search_input" type="text" placeholder="search..." v-model="title" />
             <label>開始日期：</label>
             <input type="date" v-model="startDate">
             <label>結束日期：</label>
@@ -156,7 +169,7 @@ export default {
                     <span class="span data">統計</span>
                 </div>
                 <div class="from-area">
-                    <div class="from-data" v-for="(i, index) in display_arr" :key="index">
+                    <div class="from-data" v-for="(i, index) in display_arr" :key="index" @click="write_qu(index)">
                         <div class="from-data1" @click="getindex(index)">
                             <span class="span num">{{ index + 1 }}</span>
                             <span class="span name">{{ i.questionnaire.title }}</span>
@@ -169,7 +182,7 @@ export default {
                         <!-- <RouterLink to="C">to C</RouterLink> -->
                     </div>
                 </div>
-                <RouterLink to="userB">to B</RouterLink>
+                <!-- <RouterLink to="userB">to B</RouterLink> -->
                 <div class="from-page-code">
                     <span v-for="i in pageCode_arr" @click="switch_page(i)">{{ i }}</span>
                     <!-- <span>1</span>
@@ -196,6 +209,7 @@ export default {
             </div>
         </div>
     </div>
+    <UserB :props="write_List" v-if="write_page == true"  @cancal = "switch_write_page"></UserB>
 </template>
 
 <style lang="scss" scoped>
@@ -363,4 +377,5 @@ export default {
             font-size: 14pt;
         }
     }
-}</style>
+}
+</style>

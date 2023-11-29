@@ -5,10 +5,10 @@ export default {
         return {
             data: null,
             qnid: 0,
-            search:{
-                title:" ",
-                startDate:" ",
-                endDate:" "
+            search: {
+                title: " ",
+                startDate: " ",
+                endDate: " "
             }
         }
     },
@@ -63,8 +63,8 @@ export default {
         },
         //
         deleQn() {
-            axios.post("http://localhost:8082/api/quiz/deleQuestionnaire",{
-                idList:[8]
+            axios.post("http://localhost:8082/api/quiz/deleQuestionnaire", {
+                idList: [8]
             })
                 .then(response => {
                     this.data = response.data;
@@ -79,8 +79,8 @@ export default {
         //
         deleQu() {
             axios.post("http://localhost:8082/api/quiz/deleQuestion", {
-                id:6,
-                idList:[
+                id: 6,
+                idList: [
                     1
                 ]
             })
@@ -94,7 +94,7 @@ export default {
                     console.error("error", error);
                 })
         },
-        searchData(){
+        searchData() {
             axios.get(`http://localhost:8082/api/quiz/search?title=${this.search.title}&startDate=${this.search.startDate}&endDate=${this.search.endDate}`)
                 .then(response => {
                     this.data = response.data;
@@ -105,7 +105,32 @@ export default {
                     console.error("error", error);
                 })
         },
-        test(){
+
+        setAns() {
+            console.log(new Date().toLocaleString())
+            axios.post("http://localhost:8082/api/quiz/setAns", {
+                ansList: [
+                    {
+                        qnid: 0,
+                        quid: 0,
+                        userPhone: "phone",
+                        userName: "Name",
+                        userEmail: "Email",
+                        userAge: 18,
+                        ans: "ansansans",
+                        // dateTime: "2023-12-20 12:34:56"
+                    }
+                ]
+            })
+                .then(response => {
+                    this.data = response.data;
+                    console.log(this.data.rtnCode)
+                })
+                .catch(error => {
+                    console.error("error", error);
+                })
+        },
+        test() {
 
             // fetch('http://localhost:8080/api/HwQuestionnaire/search', {
             //     method: 'GET',
@@ -143,15 +168,15 @@ export default {
             //         console.log(data);
             //     })
             //     .catch(error => console.error('Error:', error));
-        
+
+        }
     }
-}
 }
 </script>
 
 <template>
     <h1>reply</h1>
-    <input type="date" v-model="startDate">
+    <input type="date" >
     <div>
         <!-- <h1>Vue 結合 Axios 範例</h1> -->
         <button @click="getData">get</button>
@@ -159,6 +184,7 @@ export default {
         <button @click="deleQn">deleQn</button>
         <button @click="deleQu">deleQu</button>
         <button @click="searchData">search</button>
+        <button @click="setAns">setAns</button>
         <div v-if="data">
             <!-- <h2>獲取的數據：</h2> -->
             <pre>{{ data }}</pre>
