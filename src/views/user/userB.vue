@@ -65,8 +65,26 @@ export default {
 
         },
         set_ans() {
+            let k = 0
+            this.quizVoList.questionList.forEach(element => {
+                if(element.necessary == true && this.ansList[k].res == ""){
+                    alert("必填未填")
+                    return;
+                }
+                k++
+            });
+
+
             // 存進ans 同後端名稱最好
-            this.ansList.forEach(item => {
+            this.ansList.forEach((item,id) => {
+                // if(item.quid == this.quizVoList.questionList[id].quid){
+                //     if(item.ans == ""){
+                //         alert("必填未填")
+                //         return;
+                //     }
+                // }
+
+                //存
                 if (Array.isArray(item.res)) {
                     item.ans = item.res.join(';');
                 } else {
@@ -81,7 +99,8 @@ export default {
             ///
             console.log(this.ansList)
             console.log(this.user_data)
-            this.set(this.ansList);
+            // this.set( this.ansList);
+            this.cancal();
         },
         set(ans){
             axios.post("http://localhost:8082/api/quiz/setAns", {
@@ -148,6 +167,7 @@ export default {
                     <li v-for="(qu, index) in quizVoList.questionList" :key="index">
                         <!-- <li> -->
                         <span>{{ qu.title }}</span>
+                        <span v-if="qu.necessary == true">(必填)</span>
                         <ol>
                             <!-- <li> -->
                             <li v-for="(i, option) in op[index]" :key="option">
@@ -155,9 +175,6 @@ export default {
                                     v-if="qu.options_type != 'text'">
                                 <input :type="qu.options_type" v-model="ansList[index].res"
                                     v-if="qu.options_type == 'text'">
-                                <!-- v-if="qu.options_type == 'radio'">
-                                    <input :type="qu.options_type" :value="i" v-model="ansList[index].res" v-if="qu.options_type == 'checkbox'">
-                                -->
                                 <span>{{ i }}</span>
                             </li>
                         </ol>

@@ -3,7 +3,8 @@ import axios from 'axios';
 import { RouterLink, RouterView } from "vue-router";
 export default {
     emits: [
-        "cancal"
+        "cancal",
+        "cancalAll"
     ],
     data() {
         return {
@@ -25,16 +26,18 @@ export default {
         set_published() {
             // this.quizVoList.qu.ispublished = true
             this.quizVoList.qn.published = true;
-            this.LocalDate();
+            this.quizVoList.qn.opened = ((new Date(this.quizVoList.qn.startDate) <= new Date() && new Date() <= new Date(this.quizVoList.qn.endDate)))
             console.log("存入結果")
             console.log(this.quizVoList.qn)
             console.log(this.quizVoList.quList)
             this.create()
+            this.cancalAll()
         },
         set_not_publisged() {
             this.quizVoList.qn.published = false;
-            this.LocalDate();
+            this.quizVoList.qn.opened = ((new Date(this.quizVoList.qn.startDate) <= new Date() && new Date() <= new Date(this.quizVoList.qn.endDate)))
             this.create()
+            this.cancalAll()
         },
         set_opList() {
             this.quizVoList.quList.forEach(item => {
@@ -44,10 +47,9 @@ export default {
             console.log(this.opList);
         },
         create() {
-            
             axios.post("http://localhost:8082/api/quiz/create", {
-                
-                questionnaire:this.quizVoList.qn,                
+
+                questionnaire: this.quizVoList.qn,
                 questionList: this.quizVoList.quList
             })
                 .then(response => {
@@ -61,21 +63,18 @@ export default {
                 })
 
         },
-        LocalDate(){
-            const nowDate = new Date().toLocaleString();
-            const start = new Date(this.quizVoList.qn.startDate);
-            if(nowDate >= start){
-                this.quizVoList.qn.opened = true
-                // console.log("now")
-            }else{
-                this.quizVoList.qn.opened = false
-                // console.log("start")
-            }
-            // console.log(this.quizVoList.qn)
-        },
         cancal() {
             this.$emit("cancal")
+        },
+
+        cancalAll() {
+            window.location.href = 'http://localhost:5173/managerA';
+
+        },
+        test(){
+            console.log((new Date(this.quizVoList.qn.startDate) <= new Date() && new Date() <= new Date(this.quizVoList.qn.endDate)))
         }
+
     }
 }
 </script>
@@ -106,7 +105,6 @@ export default {
                         <!-- <li> -->
                         <span>{{ qu.title }}</span>
                         <ol>
-
                             <li v-for="op in opList[index]">
                                 <span>{{ op }}</span>
                             </li>
@@ -121,6 +119,7 @@ export default {
             </RouterLink> -->
         </div>
         <div class="area btn">
+            <!-- <button type="button" @click="test">test</button> -->
             <button type="button" @click="cancal">取消</button>
             <button type="button" @click="set_not_publisged">編輯完成-暫存</button>
             <button type="button" @click="set_published">編輯完成-發佈</button>
@@ -168,4 +167,5 @@ export default {
     button {
         font-size: 14pt;
     }
-}</style>
+}
+</style>

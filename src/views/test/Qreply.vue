@@ -79,7 +79,7 @@ export default {
         //
         deleQu() {
             axios.post("http://localhost:8082/api/quiz/deleQuestion", {
-                id: 6,
+                id: 5,
                 idList: [
                     1
                 ]

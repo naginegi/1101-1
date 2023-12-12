@@ -1,4 +1,5 @@
 <script>
+import axios from 'axios';
 import { RouterLink, RouterView } from "vue-router";
 import Qcheck from "./Qcheck.vue";
 export default {
@@ -25,7 +26,7 @@ export default {
                 title: "",
                 options_type: "",
                 options: "",
-                isnecessary: false,
+                necessary: false,
             },
             select: ["radio", "checkbox", "text"],
             options: {
@@ -36,20 +37,33 @@ export default {
             addPage: false,
             edit_status: false,
             check_page:false,
-            edit_state:false,
-            edit_page:false,
         };
     },
     props: [
         "props"
     ],
     created(){
-        if(this.props){
+        if(this.props.length!=0){
             this.quizVoList = this.props;
             this.qn = this.quizVoList.questionnaire;
             this.quList = this.quizVoList.questionList;
             console.log(this.quList)
+        }else{
+            axios.get(`http://localhost:8082/api/quiz/getday`)
+                .then(response => {
+                    
+                    console.log(response.data)
+                    this.qn.startDate = response.data[0]
+                    this.qn.endDate = response.data[1]
+
+                })
+                .catch(error => {
+                    console.error("error", error);
+                });
+            // console.log(new Date())
+            // this.qn.startDate =  
         }
+        // this.check_page=false;
 
     },
     methods: {
@@ -68,7 +82,9 @@ export default {
             else {
                 this.options.checkbox_arr.splice(index, 1);
             }
+            
         },
+        
         switch_addPage() {
             this.addPage = !this.addPage;
             this.clear_qu();
@@ -83,7 +99,6 @@ export default {
             }
             // 使qu獨立
             const clonedQu = JSON.parse(JSON.stringify(this.qu));
-            console.log(this.edit_state)
             if (this.edit_status == true) {
                 // this.qu.id = this.quList.
                 this.quList[this.qu.quid] = this.qu;
@@ -108,7 +123,7 @@ export default {
                     title: "",
                     options_type: "",
                     options: "",
-                    isnecessary: false,
+                    necessary: false,
                 };
                 this.options = {
                     radio_arr: [""],
@@ -120,9 +135,32 @@ export default {
             // this.edit_page=false;
         },
         qu_dele(index) {
-            console.log(this.quList[index]);
-            console.log(index);
+            let id1 = this.quList[index].qnid;
+            let id2 = this.quList[index].quid;
+
+            // console.log(id);
             this.quList.splice(index, 1);
+            this.dele_qu(id1,id2);
+        },
+        dele_qu(id1,id2){
+            let qnid = id1;
+            let quid = id2;
+            console.log(qnid);
+            console.log(quid);
+            axios.post("http://localhost:8082/api/quiz/deleQuestion", {
+                id: qnid,
+                idList: [
+                    quid
+                ]
+            })
+                .then(response => {
+                    this.data = response.data;
+                    console.log(this.data.quizVoList)
+                    console.log(this.data.rtnCode)
+                })
+                .catch(error => {
+                    console.error("error", error);
+                })
         },
         sort_id() {
             let len = this.quList.length;
@@ -163,13 +201,55 @@ export default {
                 qn: this.qn,
                 quList: this.quList
             };
-            this.switch_check();
+            //檢查輸入
+            if(this.check_prarm(this.quizVoList)){
+                //換頁
+                this.switch_check();
+            }
         },
         switch_check(){
             this.check_page = !this.check_page
         },
+        check_prarm(list){
+            console.log(list.qn)
+            console.log(list.quList)
+            if(list.qn.tite == '' 
+            ||list.qn.description== '' 
+            ||list.qn.startDate== '' 
+            ||list.qn.endDate== '' 
+            ){
+                alert('問卷欄位未填妥')
+                return false
+            }
+
+            list.quList.forEach(qu => {
+                if(qu.title == ''||qu.options_type == ''||list.quList.length == 0){
+                    alert('問卷欄位未填妥')
+                return false
+                }
+                if(qu.options_type != 'text' && !qu.options.includes(";")){
+                    alert('問題欄位未填妥')
+                    return false
+                }
+            });
+
+            if(list.qn.startDate > list.qn.endDate ){
+                alert('起訖時間錯誤')
+                return false
+            }
+
+            return true
+
+        },
         cancal() {
             this.$emit("cancal")
+            console.log("tttest")
+        },
+        cancalAll(){
+            this.cancal()
+        },
+        test(){
+            console.log(this.qu.necessary)
         }
     },
     components: { Qcheck }
@@ -239,7 +319,7 @@ export default {
                     <input type="text" v-model="qu.title">
                 </div>
                 <div class="add nece">
-                    <input type="checkbox" v-model="qu.isnecessary">
+                    <input type="checkbox" v-model="qu.necessary" @click="test">
                     <label>必填</label>
                 </div>
                 <div class="add option">

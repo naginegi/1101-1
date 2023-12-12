@@ -3,20 +3,26 @@ import { RouterLink, RouterView } from "vue-router";
 export default {
     data(){
         return{
-            page:true,
-            title:"user",
-            gopage:"managerA"
+            page:false,
+            // page:JSON.parse(localStorage.getItem('headerPage')),
+            title:"manager",
+            gopage:"",
         }
-    },
+},
+
     methods:{
         swit(){
+            // this.page = JSON.parse(localStorage.getItem('headerPage'));
+            // localStorage.setItem('headerPage', JSON.stringify(!this.page));
             this.page = !this.page
             if(this.page){
                 this.title = "user";
-                this.gopage = "userA"
+                this.$router.push('/userA');
+                // this.gopage = "userA"
             }else{
                 this.title = "manager";
-                this.gopage = "managerA"
+                this.$router.push('/managerA');
+                // this.gopage = "managerA"
             }
         }
     }
@@ -26,20 +32,20 @@ export default {
 
 <template>
     <div class="title" :class="{titlecolor:page}">
-        <RouterLink :to="gopage" class="roulink">
+        <!-- <RouterLink :to="gopage" class="roulink"> -->
             <h1 @click="swit">{{ title }}</h1>
-        </RouterLink>
+        <!-- </RouterLink> -->
         <div class="link user" v-if="page==true">
-            <RouterLink to="mainpage">A</RouterLink>
-            <RouterLink to="Qdesign">B</RouterLink>
-            <RouterLink to="Qreply">C</RouterLink>
+            <!-- <RouterLink to="mainpage">A</RouterLink> -->
+            <!-- <RouterLink to="Qdesign">B</RouterLink> -->
+            <!-- <RouterLink to="Qreply">C</RouterLink> -->
         </div>
         <div class="link manager" v-if="page==false">
-            <RouterLink to="managerA">A</RouterLink>
-            <RouterLink to="managerB">B</RouterLink>
-            <RouterLink to="C">C</RouterLink>
-            <RouterLink to="QdesignCopy">D</RouterLink>
-            <RouterLink to="Qcheck">E</RouterLink>
+            <!-- <RouterLink to="managerA">A</RouterLink> -->
+            <!-- <RouterLink to="managerB">B</RouterLink> -->
+            <!-- <RouterLink to="C">C</RouterLink> -->
+            <!-- <RouterLink to="QdesignCopy">D</RouterLink> -->
+            <!-- <RouterLink to="Qcheck">E</RouterLink> -->
         </div>
     </div>
 </template>
@@ -53,6 +59,12 @@ export default {
     align-items: center;
     font-size: 16pt;
     background-color: #FCD1D1;
+    h1{
+        color: blue;
+        &:hover{
+            color: red;
+        }
+    }
     .roulink{
         text-decoration: none;
     }

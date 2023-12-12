@@ -18,30 +18,54 @@ export default {
             pre_Title_Text: "",
             pre_Instruction: "",
             write_List: {},
-            write_page:false,
+            write_page: false,
         };
     },
     mounted() {
         this.getDate();
-        console.log(this.total_arr);
-        this.page = this.total_arr.length / 10 + 1;
-        for (let i = 1; i <= this.page + 2; i++) {
-            this.pageCode_arr.push(i);
-        }
+        // console.log(this.total_arr);
+        // this.page = this.total_arr.length / 10 + 1;
+        // for (let i = 1; i <= this.page + 2; i++) {
+        //     this.pageCode_arr.push(i);
+        // }
     },
     methods: {
         getDate() {
-            axios.get("http://localhost:8082/api/quiz/getAll")
+            axios.get("http://localhost:8082/api/quiz/getPublished")
                 .then(response => {
                     this.data = response.data;
                     this.total_arr = this.data.quizVoList;
+                    // this.getpub();
                     this.addDisplayArr(1);
+                    this.page = Math.ceil(this.total_arr.length / 10);
+                    this.pageCode_arr = [];
+                    for (let i = 1; i <= this.page; i++) {
+                        this.pageCode_arr.push(i);
+                    }
                     console.log(this.data.quizVoList);
                     console.log(this.total_arr);
                 })
                 .catch(error => {
                     console.error("error", error);
                 });
+        },
+        getpub() {
+            let pub;
+            let pub_arr = [];
+            for(let i=0 ; i<this.total_arr.length ; i++){
+                if (this.total_arr[i].questionnaire.published == true) {
+                    pub=this.total_arr[i]
+                    pub_arr.push(pub)
+                    // pub_arr.push(this.total_arr[i].questionnaire,this.total_arr[i].quizVoList)
+                }
+            }
+            console.log(pub_arr)
+            // this.total_arr.forEach(arr => {
+            //     console.log(arr)
+            //     if (arr.questionnaire.published == true) {
+            //         pub_arr.push(arr)
+            //     }
+            // });
         },
         addDisplayArr(k) {
             this.display_arr = [];
@@ -82,6 +106,11 @@ export default {
                 .then(response => {
                     this.total_arr = response.data.quizVoList;
                     this.addDisplayArr(1);
+                    this.page = Math.ceil(this.total_arr.length / 10);
+                    this.pageCode_arr = [];
+                    for (let i = 1; i <= this.page; i++) {
+                        this.pageCode_arr.push(i);
+                    }
                     console.log("total");
                     console.log(this.total_arr);
                 })
@@ -97,7 +126,7 @@ export default {
             this.switch_write_page();
             console.log(this.write_List);
         },
-        switch_write_page(){
+        switch_write_page() {
             this.write_page = !this.write_page
         }
     },
@@ -162,22 +191,31 @@ export default {
                 <div class="from-title">
                     <span class="span num">編號</span>
                     <span class="span name">名稱</span>
-                    <span class="span anon">記名</span>
+                    <!-- <span class="span anon">記名</span> -->
                     <span class="span stat">狀態</span>
                     <span class="span start">開始</span>
                     <span class="span end">結束</span>
-                    <span class="span data">統計</span>
+                    <!-- <span class="span data">統計</span> -->
                 </div>
                 <div class="from-area">
-                    <div class="from-data" v-for="(i, index) in display_arr" :key="index" @click="write_qu(index)">
+                    <div class="from-data" v-for="(i, index) in display_arr" :key="index">
                         <div class="from-data1" @click="getindex(index)">
                             <span class="span num">{{ index + 1 }}</span>
-                            <span class="span name">{{ i.questionnaire.title }}</span>
-                            <span class="span anon">{{ i.questionnaire.anonymous }}</span>
-                            <span class="span stat">狀態</span>
+                            <div class="span name" :style="{ cursor: 'pointer' }" @click="write_qu(index)" v-if="i.questionnaire.opened == true">
+                                {{i.questionnaire.title }}
+                                <span :style="{ margin: '5px 5px' }" v-if="i.questionnaire.anonymous == true">(記名)</span>
+                            </div>
+                            <div class="span name" :style="{ cursor: 'pointer' }" v-if="i.questionnaire.opened == false" >
+                                {{i.questionnaire.title }}
+                                <span :style="{ margin: '5px 5px' }" v-if="i.questionnaire.anonymous == true">(記名)</span>
+                            </div>
+                            <!-- <span class="span anon">{{ i.questionnaire.anonymous }}</span> -->
+                            <span class="span stat"  v-if="i.questionnaire.opened == true">開放中</span>
+                            <span class="span stat"  v-if="i.questionnaire.opened == false && new Date() <= new Date(i.questionnaire.endDate)">未開放</span>
+                            <span class="span stat"  v-if="i.questionnaire.opened == false && new Date() > new Date(i.questionnaire.endDate)">已過期</span>
                             <span class="span start">{{ i.questionnaire.startDate }}</span>
                             <span class="span end">{{ i.questionnaire.endDate }}</span>
-                            <span class="span data">統計</span>
+                            <!-- <span class="span data">統計</span> -->
                         </div>
                         <!-- <RouterLink to="C">to C</RouterLink> -->
                     </div>
@@ -209,7 +247,7 @@ export default {
             </div>
         </div>
     </div>
-    <UserB :props="write_List" v-if="write_page == true"  @cancal = "switch_write_page"></UserB>
+    <UserB :props="write_List" v-if="write_page == true" @cancal="switch_write_page"></UserB>
 </template>
 
 <style lang="scss" scoped>
@@ -227,7 +265,7 @@ export default {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 40px 0px;
+        // padding: 40px 0px;
 
         input {
             height: 4%;
@@ -262,7 +300,7 @@ export default {
             }
 
             .name {
-                width: 30%;
+                width: 50%;
             }
 
             .anon {
@@ -302,6 +340,9 @@ export default {
                 justify-content: flex-start;
                 // border: 1px solid black;
                 margin-top: 40px;
+                // border: 1px solid black;
+                // box-shadow: inset 2px 2px 5px black;
+
 
                 .from-data {
                     width: 100%;
@@ -317,7 +358,7 @@ export default {
                             background-color: rgba(0, 0, 0, 0.075);
                         }
 
-                        a {
+                        a{
                             font-size: 20pt;
                             margin-right: 20px;
                         }
